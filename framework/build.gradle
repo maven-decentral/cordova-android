@@ -1,0 +1,51 @@
+apply plugin: 'maven-publish'
+apply plugin: 'android-library'
+
+version = "2.3.0-SNAPSHOT"
+group = "org.apache"
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.10.+'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'commons-codec:commons-codec:1.9'
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "19.0.3"
+
+    defaultConfig {
+//        minSdkVersion 7
+//        targetSdkVersion 17
+//        versionCode 1
+//        versionName "1.0"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact "${project.libsDir}/${project.name}-${project.version}.aar"
+        }
+    }
+    repositories {
+        maven {
+            url "../../maven-decentral.github.io/m2/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
+        }
+    }
+}
