@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'android-library'
 
-version = "2.3.0"
+version = "2.3.0-1"
 group = "org.apache"
 
 buildscript {
@@ -40,6 +40,23 @@ android {
 publishing {
     publications {
         maven(MavenPublication) {
+            // pull the transitive deps in
+            // borrowed from: https://github.com/danieltwagner/android-async-logger/blob/master/build.gradle
+            pom.withXml {
+                def dependenciesRoot = asNode().appendNode('dependencies')
+                // read the compile dependencies...
+                def compileConfiguration = project.configurations.getByName("compile")
+                def resolvedConfiguration = compileConfiguration.resolvedConfiguration
+                def resolvedDependencies = resolvedConfiguration.firstLevelModuleDependencies
+                resolvedDependencies.each { dp ->
+                    // ... and generate the XML for each dependency manually
+                    def thisDependency = dependenciesRoot.appendNode('dependency')
+                    thisDependency.appendNode('groupId', dp.moduleGroup)
+                    thisDependency.appendNode('artifactId', dp.moduleName)
+                    thisDependency.appendNode('version', dp.moduleVersion)
+                }
+                return dependenciesRoot
+            }
             artifact "${project.libsDir}/${project.name}-${project.version}.aar"
         }
     }
